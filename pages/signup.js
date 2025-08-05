@@ -1,64 +1,62 @@
-import {useState} from 'react';
-import {supabase} from '../../lib/supabase';
-
-
+import { useState } from 'react'
+import {supabase} from '../../lib/supabase'
 export default function SignUp(){
-    const [email, setEmail] = useState('');
-    const [password, setPassword]=useState('')
-    const [loading, setLoading]=useState(false)
 
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
-    async function handleSignUp(e){
-        e.preventDefault();     //stops from reloading the page 
-
-
-        if (password.length < 6) {
-      alert("Password must be at least 6 characters");
-      return;
-    }
+    async function handleSubmit(e){
+        e.preventDefault()
         setLoading(true)
+        setError('')
 
-        try{
-        const {error} = await supabase.auth.signUp({
-            email: email,
-            password: password
-        })
-
+        const {data, error} = await supabase.auth.signUp(
+            {
+                email: email, 
+                password: password
+            }
+        )
 
         if (error){
-            console.error("Signup Error: ", error)
-            alert("Error: ", error.message)
-        }else{
-            alert("Check your email to confirm your account!")
-        }}
-        finally{
-            setLoading(false)
+            
+            console.log("Error: ", error)
+            setError(error.message)
+        }else {
+            console.log("Success, check your email!")
         }
-        
+
+        setLoading(false)
     }
 
 
-return (
-    <form onSubmit={handleSignUp}>
+    return (
+        <form onSubmit={handleSubmit}>
 
-        <input 
-        type="email"
-        value = {email}
-        placeholder='example@email.com'
-        onChange={(e) => setEmail(e.target.value)}
-        required/>
+            <div>
+            <h2>Sign Up</h2>
+            {error && <p style={{color: 'red'}}>{error}</p>}
+            <input
+            type="email"
+            placeholder = "Enter your email"
+            value = {email}
+            onChange={(e)=> setEmail(e.target.value)}
+            />
 
-        <input 
-        type="password"
-        value = {password}
-        onChange={(e)=> setPassword(e.target.value)}
-        placeholder='Password minimum 6 characters'
-        required
-        />
+            <input 
+            type = "password"
+            placeholder = "Enter your password"
+            value = {password}
+            onChange={(e)=> setPassword(e.target.value)}
+            />
 
-        <button type='submit' disabled={loading}>
-            {loading ? 'Signing up...': 'Sign Up'}
-        </button>
-    </form>
-)
+            </div>
+
+            <button type='Submit' disabled={loading}>{loading? 'Creating account...':'Sign Up'}</button>
+            
+        </form>
+
+
+    )
 }

@@ -1,65 +1,62 @@
 import {useState} from 'react'
 import { supabase } from '../../lib/supabase'
+import { useRouter } from 'next/router'
 
-export default function LogIn(){
+export default function Login(){
+
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-
+    const router = useRouter()
     async function handleLogin(e){
         e.preventDefault()
-
+        setError('')
         setLoading(true)
-
-        try{
-            const{error} = await supabase.auth.signInWithPassword({
-                email: email,
+        const {error, data} = await supabase.auth.signInWithPassword(
+            {
+                email: email, 
                 password: password
-            })
-
-            if (error){
-                console.error("Login Error: ", error)
-                alert("Error", error.message)
             }
-            else{
-                console.log("Login Successful!")
-                alert("Logged in successfully!")
-            }}
-            finally{
-            setLoading(false)
+        )
+        
 
-            }
+        if (error){
+            setError(error.message)
+
         }
-
-
-
-
-
-
-
+        else{
+            console.log('You have successfully logged in!')
+            router.push('/dashboard')
+        }
+        setLoading(false)
+    }
 
 
     return (
-        <form onSubmit= {handleLogin}>
-            <input         
-            type = "email"
-            value = {email}
-            placeholder='example@email.com'
-            onChange={(e)=> setEmail(e.target.value)}   
-            required
-            />
+            <form onSubmit={handleLogin}>
+                <div>
+                <h2>Login</h2>
+                <input 
+                type='email'
+                placeholder= 'Enter your email'
+                value = {email}
+                onChange={ (e)=> setEmail(e.target.value)}
+                />
+                <input
+                type = 'password'
+                placeholder = 'Enter your password'
+                value = {password}
+                onChange={(e)=> setPassword(e.target.value)}
+                />
+               </div>
+                {error && <p style={{color: 'red'}}>{error}</p>}
 
-            <input 
-            type = "password"
-            value = {password}
-            placeholder='Password minimum 6 characters'
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            />
 
-            <button type='submit' disabled={loading}>
-                {loading ? 'Logging in...': 'Login'}
-            </button>
-        </form>
+            <button type='submit' disabled={loading}>{loading ? 'Logging in...': 'LoginIn'}</button>
+
+
+            </form>
+
     )
 }
