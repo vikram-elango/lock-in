@@ -16,6 +16,15 @@ export default function Dashboard(){
 
         }
 
+    const goals = [
+        'Wake up at 5:30 am',
+        '1 hour of workout',
+        'Journal',
+        '1 hour of deep work'
+    ]
+
+    const [completed, setCompleted] = useState(Array(goals.length).fill(false))
+
 
     useEffect(()=>{
 
@@ -50,6 +59,29 @@ export default function Dashboard(){
     <div>
         <div>Welcome, {user?.email}</div>
         <button onClick={handleLogout}>Logout</button>
+
+
+        {goals.map((goal, index)=> (
+            <div key={index}>
+            <input type='checkbox'
+            checked={completed[index]}
+            onChange={()=> 
+            {
+                const newChecked = [...completed]
+                newChecked[index] = !newChecked[index]
+                setCompleted(newChecked)
+            }
+            }
+            />
+            {goal}
+            </div>
+        ))
+        }
+
+
+
+
+
     </div>
     
 )
