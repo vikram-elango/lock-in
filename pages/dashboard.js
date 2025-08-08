@@ -7,6 +7,8 @@ export default function Dashboard(){
     const router = useRouter()
     const [user, setUser] = useState(null)
 
+    
+
     async function handleLogout(){
             const {error} = await supabase.auth.signOut()
 
@@ -24,6 +26,20 @@ export default function Dashboard(){
     ]
 
     const [completed, setCompleted] = useState(Array(goals.length).fill(false))
+
+    const completedCount = completed.filter(Boolean).length 
+    const totalGoals = goals.length
+    const completionPercentage = Math.round((completedCount/totalGoals)*100)
+
+    function getBrutalMessage(percentage){
+
+        if (percentage==100) return "Perfect day. Don't get cocky."
+        if (percentage>=75) return "Good, but not great. 100% or nothing."
+        if (percentage>=50) return "Half-assing it again. Mediocrity is comfortable, isn't it?"
+        if (percentage>=25) return "Pathetic effort. You planned these goals and failed most."
+        return "Zero progress. Others are winning while you make excuses"
+
+    }
 
 
     useEffect(()=>{
@@ -59,7 +75,26 @@ export default function Dashboard(){
     <div>
         <div>Welcome, {user?.email}</div>
         <button onClick={handleLogout}>Logout</button>
+        <div>Progress {completedCount}/{totalGoals} goals ({completionPercentage})</div>
+        <div style={
+            {
+                width:'200px', 
+                height:'20px',
+                backgroundColor: 'gray',
+                borderRadius: '10px'
+            }
+        }>
 
+            <div style={{
+                width: `${completionPercentage}%`,
+                height: '20px',
+                backgroundColor: 'lightgreen',
+                borderRadius: '10px'
+            }}>
+
+            </div>
+        </div>
+        {getBrutalMessage(completionPercentage)}
 
         {goals.map((goal, index)=> (
             <div key={index}>
