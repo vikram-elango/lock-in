@@ -26,7 +26,7 @@ export default function Dashboard(){
     ]
 
     const [completed, setCompleted] = useState(Array(goals.length).fill(false))
-
+    console.log('completed: ', completed)
     const completedCount = completed.filter(Boolean).length 
     const totalGoals = goals.length
     const completionPercentage = Math.round((completedCount/totalGoals)*100)
@@ -53,23 +53,47 @@ export default function Dashboard(){
 
             if (data.user){
                 setUser(data.user)
+                loadTodaysCheckin(data.user)
+
             }
             else{
                 router.push('/login')
             }
         }
-
-
-
         checkAuth()
-
-        
 
     }, [])
 
-    
+        async function loadTodaysCheckin(userData){
+            const today = new Date().toISOString().split('T')[0]
+            const {data, error} = await supabase.from('daily_checkins').select('*').eq('user_id', userData.id).eq('date', today)
+            console.log('Loading for user:' , userData.id)
+            console.log('Today: ', today)
+            
+            console.log("query results: ", data)
+            console.log("errors query : ", error)
+            if (data && data.length && !error){
+            setCompleted(data[0].completed_goals)
+        }
+        }
 
-    
+            async function saveCheckin(updateCompleted){
+            const today = new Date().toISOString().split('T')[0]
+            console.log('savecheckin date', updateCompleted)
+            const {error} = await supabase.from('daily_checkins').upsert({
+                user_id: user.id,
+                date: today, 
+                completed_goals: updateCompleted
+            }, {
+                onConflict: 'user_id,date'
+            })
+
+            if (error){
+                console.log("Error: ", error)
+            }
+
+
+        }
 
     return (
     <div>
@@ -105,6 +129,7 @@ export default function Dashboard(){
                 const newChecked = [...completed]
                 newChecked[index] = !newChecked[index]
                 setCompleted(newChecked)
+                saveCheckin(newChecked)
             }
             }
             />
