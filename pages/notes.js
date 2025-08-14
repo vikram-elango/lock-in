@@ -33,11 +33,56 @@ export default function Notes(){
 
     }, []) 
 
+    async function handleSubmit(e){
+        e.preventDefault()
+
+        const today = new Date().toISOString().split('T')[0]
+
+        const {data, error} = await supabase.from('notes').insert({
+            user_id: user.id,
+            //date: today,
+            title:title, 
+            content: content
+
+        }).select()
+
+        if (data && !error){
+            setTitle('')
+            setContent('')
+            setNotes([data[0], ...notes])
+        }
+
+
+    }
+
     
 
     return (
         <div>
+            <form
+            onSubmit={handleSubmit}
+            >
+
             <h1>My notes</h1>
+            <div>
+
+            <input
+            value = {title}
+            placeholder="Enter Title"
+            onChange={(e)=> setTitle(e.target.value)}
+            />
+            </div>
+            <div>
+            <textarea
+            value= {content}
+            placeholder = "Write your notes here..."
+            onChange={(e)=> setContent(e.target.value)}
+            />
+            </div>
+            <button
+            type="submit"
+            >Submit</button>
+            </form>
         </div>
     )
 }
