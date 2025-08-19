@@ -16,10 +16,18 @@ export default function Notes(){
             
             const {error, data} = await supabase.auth.getUser()
 
-            if(data.user){
+            if (data.user){
 
                 setUser(data.user)
                 console.log(`Welcome, ${data.user.email}`)
+
+                const {data: notesData, error: notesError} = await supabase.from('notes').select('*').eq('user_id', data.user.id)
+                if (notesData && !notesError){
+                    setNotes(notesData)
+                
+                }
+
+                
             }
             else{
                 router.push('/login')
@@ -37,10 +45,9 @@ export default function Notes(){
         e.preventDefault()
 
         const today = new Date().toISOString().split('T')[0]
-
         const {data, error} = await supabase.from('notes').insert({
             user_id: user.id,
-            //date: today,
+            created_at: today,
             title:title, 
             content: content
 
@@ -64,6 +71,13 @@ export default function Notes(){
             >
 
             <h1>My notes</h1>
+            {notes.map((note, index)=>(
+                <div key={note.id}>
+                    <div>{index+1}. {note.title}</div>
+                    <div>{note.content}</div>
+                    </div>
+            ))}
+
             <div>
 
             <input
